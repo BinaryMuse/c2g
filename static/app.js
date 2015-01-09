@@ -171,11 +171,8 @@ myApp.factory('stadtMobilRates', function($http) {
   };
 });
 
-myApp.controller('smController', ['$scope', 'stadtMobilRates', function($scope, stadtMobilRates) {
-  var stadtmobilRates = null;
-  stadtMobilRates().success(function(data) {
-    stadtmobilRates = data;
-  });
+myApp.controller('smController', ['$scope', 'stadtmobilRates', function($scope, stadtmobilRates) {
+  console.log(stadtmobilRates);
 
   $scope.distance = 10;
   $scope.timeHours = 20;
@@ -321,7 +318,7 @@ myApp.controller('smController', ['$scope', 'stadtMobilRates', function($scope, 
     if (tariff === 'studi') {
       tariff = 'classic';
     }
-    return stadtmobilRates.tariff.rate;
+    return stadtmobilRates[tariff][$scope.rate];
   };
 
   var priceDistance = function(km, rate, tariff) {
@@ -375,7 +372,14 @@ myApp.config(['$routeProvider',
     }).
     when('/sm', {
       templateUrl: 'partials/sm.html',
-      controller: 'smController'
+      controller: 'smController',
+      resolve: {
+        stadtmobilRates: ['stadtMobilRates', function(stadtMobilRates) {
+          return stadtMobilRates().then(function(resp) {
+            return resp.data;
+          });
+        }]
+      }
     }).
     otherwise({
       redirectTo: '/c2g'
